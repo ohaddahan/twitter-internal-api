@@ -1,10 +1,11 @@
 [package]
 name = "twitter-internal-api"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "Twitter internal API"
 license = "MIT"
 authors = ["ohaddahan@gmail.com"]
+repository = "https://github.com/ohaddahan/twitter-internal-api.git"
 
 [dependencies]
 anyhow = "1.0"
