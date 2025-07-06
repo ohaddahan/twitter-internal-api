@@ -1,0 +1,63 @@
+# https://github.com/LukeMathWalker/zero-to-production/blob/main/.github/workflows/general.yml
+name: fmt-clippy-build
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - master
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+#env:
+#  BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
+#  EXT_KEYPAIR: ${{ secrets.EXT_KEYPAIR }}
+jobs:
+  fmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          components: rustfmt,clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: fmt-clippy-build
+          cache-all-crates: true
+      - name: Enforce formatting
+        run: cargo fmt --all -- --check
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          components: rustfmt,clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: fmt-clippy-build
+          cache-all-crates: true
+      - name: Linting
+        run: cargo clippy --all -- -D warnings -A clippy::macro-metavars-in-unsafe
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          key: fmt-clippy-build
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: fmt-clippy-build
+          cache-all-crates: true
+      - name: Build
+        run: |
+          cargo build --release
